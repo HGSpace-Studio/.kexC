@@ -1,0 +1,23 @@
+-- Start building task run all -- (953209207)
+-- Start building task all -- (0)
+-- Start building task kernel -- (1)
+-- Enter folder esp/EFI/BOOT --
+<0> Generating esp/EFI/BOOT/BOOTX64.EFI
+<0> Running command: ""D:\\mingw64\\bin\\gcc.exe" -ffreestanding -fno-stack-protector -fno-short-enums -Wall -Wextra -O2 -Wl,--subsystem,10 -Wl,-e,efi_main -nostdlib -nostartfiles -I bootloader -o esp/EFI/BOOT/BOOTX64.EFI bootloader/bootx64.c"
+bootloader/bootx64.c:158:15: warning: 'load_pe64' defined but not used [-Wunused-function]
+  158 | static UINT64 load_pe64(void *buf, struct EFI_SYSTEM_TABLE *ST) {
+      |               ^~~~~~~~~
+bootloader/bootx64.c:30:13: warning: 'serial_puthex64' defined but not used [-Wunused-function]
+   30 | static void serial_puthex64(UINT64 val) {
+      |             ^~~~~~~~~~~~~~~
+-- Enter folder esp --
+<3> Generating esp/KENUXK.BIN
+DONE TASK run all IN 1.0s.
+Result:
+Started 3 tasks
+Entered 2 folders
+Built 0 files
+Generated 2 files
+Ran 1 commands
+Downloaded 0 files
+0 errors

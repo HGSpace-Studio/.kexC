@@ -1,0 +1,999 @@
+{
+  "command": [
+    "run",
+    "all"
+  ],
+  "created_at": "2026-07-26T12:01:58+00:00",
+  "elapsed_seconds": 23.234,
+  "finished_at": "2026-07-26T12:02:22+00:00",
+  "id": "101569612",
+  "log": "buildsystem\\logs\\101569612.log",
+  "metrics": {
+    "built_files": 135,
+    "completed": 140,
+    "downloaded_files": 0,
+    "elapsed_seconds": 23.234,
+    "entered_folders": 9,
+    "errors": 0,
+    "executed_targets": 138,
+    "generated_files": 3,
+    "peak_parallel_workers": 4,
+    "ran_commands": 1,
+    "skipped_targets": 0,
+    "started_tasks": 3,
+    "timings": [
+      {
+        "kind": "assemble",
+        "seconds": 0.0577,
+        "status": "executed",
+        "target": "assemble:kernel/arch/x86_64/interrupt.S",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4354,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/vsprintf.c",
+        "worker": 2
+      },
+      {
+        "kind": "generate",
+        "seconds": 0.6131,
+        "status": "executed",
+        "target": "bootloader",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8103,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/unistd.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8789,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/time.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6618,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/string.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2959,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/stdio.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2993,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/signal.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6687,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/stdlib.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2485,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/setjmp.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2247,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/errno.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5072,
+        "status": "executed",
+        "target": "compile:kernel/kernel/wait.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5962,
+        "status": "executed",
+        "target": "compile:kernel/kernel/workqueue.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7879,
+        "status": "executed",
+        "target": "compile:kernel/lib/libc/math.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3184,
+        "status": "executed",
+        "target": "compile:boot:kernel/kernel/syscall.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5345,
+        "status": "executed",
+        "target": "compile:kernel/kernel/sysfs.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.105,
+        "status": "executed",
+        "target": "compile:kernel/kernel/unixsock.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7171,
+        "status": "executed",
+        "target": "compile:kernel/kernel/timer.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4669,
+        "status": "executed",
+        "target": "compile:kernel/kernel/stacktrace.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4097,
+        "status": "executed",
+        "target": "compile:kernel/kernel/shell_enhanced.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.0011,
+        "status": "executed",
+        "target": "compile:kernel/kernel/sync.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7941,
+        "status": "executed",
+        "target": "compile:kernel/kernel/signal.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4829,
+        "status": "executed",
+        "target": "compile:kernel/kernel/rcu.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5483,
+        "status": "executed",
+        "target": "compile:kernel/kernel/process.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5476,
+        "status": "executed",
+        "target": "compile:kernel/kernel/kthread.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5521,
+        "status": "executed",
+        "target": "compile:boot:kernel/kernel/kernel.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8668,
+        "status": "executed",
+        "target": "compile:kernel/kernel/module.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3311,
+        "status": "executed",
+        "target": "compile:kernel/kernel/interrupt.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.3253,
+        "status": "executed",
+        "target": "compile:kernel/kernel/printk.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.484,
+        "status": "executed",
+        "target": "compile:kernel/kernel/fifo.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6308,
+        "status": "executed",
+        "target": "compile:kernel/kernel/fs.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.9602,
+        "status": "executed",
+        "target": "compile:kernel/kernel/gdb_stub.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.2884,
+        "status": "executed",
+        "target": "compile:kernel/kernel/ipc.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3502,
+        "status": "executed",
+        "target": "compile:kernel/kernel/drivers.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3475,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/xhci.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.423,
+        "status": "executed",
+        "target": "compile:kernel/kernel/devtmpfs.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7593,
+        "status": "executed",
+        "target": "compile:kernel/kernel/epoll.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2946,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/usermode.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6132,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/virtio.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4694,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/vga.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4556,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/tmpfs.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3925,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/sound.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6566,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/usb_hid.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3381,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/smbios.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5144,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/smp.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.9027,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/swap.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4662,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/security.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3799,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/sata.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8264,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/slab.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4577,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/rtc.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3309,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/pit.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.447,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/pic.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.2277,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/procfs.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.1495,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/pagefault.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.1464,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/pagecache.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.5996,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/pci.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.4582,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/nvme.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.0065,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/memory.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.4302,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/mmap.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5906,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/keyboard.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 2.0754,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/net.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4479,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/ioapic.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2987,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/idt.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.3571,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/ldso.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2619,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/hpet.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3716,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/hda.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.2208,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/jbd2.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4648,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/gdt.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8216,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/gui.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5723,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/elf.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3254,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/ehci.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.9213,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/ext2.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 1.0171,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/framebuffer.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4831,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/efi_entry.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5951,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/efi.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6253,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/cfs.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6356,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/buddy.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4655,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/apic.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5552,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/ahci.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5107,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/acpi_pm.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4885,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/acpi_madt.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3933,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/acpi.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.387,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_wait.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3579,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_time.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7312,
+        "status": "executed",
+        "target": "compile:kernel/arch/x86_64/ac97.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8703,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_vfs.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5961,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_string.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2713,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_socket.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5613,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_sort.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2783,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_smp.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2835,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_skbuff.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2788,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_security.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2884,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_sched.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.608,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_seq_file.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3487,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_rcu.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3391,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_random.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6805,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_rbtree.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5833,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_process.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 2.3483,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_syscall.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.52,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_pci.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3156,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_notifier.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.2898,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_netdevice.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3015,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_netlink.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4208,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_mutex.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.892,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_params.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3596,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_module.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3096,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_list.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.6852,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_mempool.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4974,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_memory.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4139,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_kthread.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3544,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_irq.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5275,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_kfifo.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5178,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_io.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7112,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_kobject.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4734,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_init.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.533,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_idr.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8001,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_hash.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8053,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_ftrace.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5239,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_dma.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8208,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_fs.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3482,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_crc.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.8163,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_device.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5998,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_cpumask.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3873,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_completion.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.9488,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_debugfs.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.34,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_bitmap.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3441,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_atomic.c",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.711,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_cdev.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.7715,
+        "status": "executed",
+        "target": "compile:kernel/api/kapi_blkdev.c",
+        "worker": 2
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.5214,
+        "status": "executed",
+        "target": "compile:apps/container-os/src/volume.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.473,
+        "status": "executed",
+        "target": "compile:apps/container-os/src/manager.c",
+        "worker": 1
+      },
+      {
+        "kind": "assemble",
+        "seconds": 0.0567,
+        "status": "executed",
+        "target": "assemble:kernel/arch/x86_64/boot/start64.s",
+        "worker": 1
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.4877,
+        "status": "executed",
+        "target": "compile:apps/container-os/src/image.c",
+        "worker": 0
+      },
+      {
+        "kind": "compile",
+        "seconds": 0.3981,
+        "status": "executed",
+        "target": "compile:apps/container-os/src/container.c",
+        "worker": 3
+      },
+      {
+        "kind": "compile",
+        "seconds": 2.1566,
+        "status": "executed",
+        "target": "compile:apps/container-os/src/container_gui.c",
+        "worker": 2
+      },
+      {
+        "kind": "link",
+        "seconds": 0.644,
+        "status": "executed",
+        "target": "kernel-image",
+        "worker": 1
+      },
+      {
+        "kind": "generate",
+        "seconds": 0.0675,
+        "status": "executed",
+        "target": "kernel-bin",
+        "worker": 0
+      },
+      {
+        "kind": "generate",
+        "seconds": 0.0049,
+        "status": "executed",
+        "target": "esp-update",
+        "worker": 3
+      }
+    ],
+    "total": 140,
+    "worker_busy_seconds": 85.35362319991691
+  },
+  "started_at": "2026-07-26T12:01:58+00:00",
+  "status": "done",
+  "task": "run all",
+  "total_targets": 140
+}

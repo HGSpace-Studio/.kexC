@@ -1,0 +1,17 @@
+build/
+build.ninja
+.ninja_deps
+.ninja_log
+
+*.o
+*.d
+*.so
+*.elf
+*.bin
+*.iso
+
+bootloader/BOOTX64.EFI
+bootloader/BOOTX64-simple.EFI
+bin/init
+bin/shell
+iso/boot/

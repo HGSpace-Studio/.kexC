@@ -1,0 +1,99 @@
+KenuxOS 开发者许可协议 (KenuxOS Development License)
+
+Copyright (c) 2026 KenuxOS Project. All rights reserved.
+
+第一条 授权范围
+
+  本软件 (KexKit 工具链，包含编译器 kexc、解释器 kex_interp、运行时库
+  libkex 及相关源码) 仅授权用于为 KenuxOS 操作系统开发应用程序。
+
+  被授权人可以：
+    1. 使用、编译、修改本软件源码，以开发面向 KenuxOS 的应用程序；
+    2. 在 KenuxOS 项目内部使用和分发本软件的修改版本；
+    3. 提交补丁或改进至 KenuxOS 官方仓库。
+
+第二条 限制
+
+  被授权人不得：
+    1. 将本软件用于任何商业目的，包括但不限于销售、出租、订阅、
+       用于提供付费服务或嵌入商业产品；
+    2. 抄袭本软件的源码、设计理念、文件格式或架构，用于非 KenuxOS
+       项目；
+    3. 将本软件搬运至其他代码托管平台、仓库或项目进行发布、分发
+       或展示；
+    4. 移除、遮挡或篡改本软件中的版权声明和许可声明；
+    5. 以本软件为基础申请专利或其他知识产权。
+
+第三条 免责声明
+
+  本软件按"现状" (AS IS) 提供，不附带任何明示或暗示的保证，包括
+  但不限于适销性、特定用途适用性及非侵权保证。作者不对因使用本
+  软件造成的任何直接或间接损失承担责任。
+
+第四条 违约条款
+
+  违反本协议任何条款将自动终止授权，被授权人须立即停止使用本软件
+  并销毁所有副本。
+
+第五条 协议变更
+
+  作者保留随时修改本协议的权利。修改后的协议自发布之日起对新用户
+  生效；现有用户继续适用其首次获取本软件时的协议版本。
+
+------------------------------------------------------------------
+
+KenuxOS Development License
+
+Copyright (c) 2026 KenuxOS Project. All rights reserved.
+
+1. Grant of License
+
+   This software (the KexKit toolchain, including the kexc compiler,
+   kex_interp interpreter, libkex runtime library and related source
+   code) is licensed solely for developing applications for the
+   KenuxOS operating system.
+
+   Licensees may:
+     1. Use, compile, and modify this software's source code to
+        develop applications targeting KenuxOS;
+     2. Use and distribute modified versions within the KenuxOS
+        project;
+     3. Submit patches or improvements to the official KenuxOS
+        repository.
+
+2. Restrictions
+
+   Licensees shall NOT:
+     1. Use this software for any commercial purpose, including but
+        not limited to selling, renting, subscription, offering paid
+        services, or embedding in commercial products;
+     2. Plagiarize this software's source code, design concepts,
+        file formats, or architecture for non-KenuxOS projects;
+     3. Republish, redistribute, or display this software on other
+        code hosting platforms, repositories, or projects;
+     4. Remove, obscure, or alter copyright or license notices in
+        this software;
+     5. Apply for patents or other intellectual property rights based
+        on this software.
+
+3. Disclaimer
+
+   This software is provided "AS IS", without warranty of any kind,
+   express or implied, including but not limited to the warranties of
+   merchantability, fitness for a particular purpose and
+   noninfringement. In no event shall the authors be liable for any
+   claim, damages or other liability arising from the use of this
+   software.
+
+4. Termination
+
+   Violation of any term of this agreement automatically terminates
+   the license. The licensee must immediately cease using this
+   software and destroy all copies.
+
+5. Amendments
+
+   The author reserves the right to modify this agreement at any
+   time. Modified agreements apply to new users from the date of
+   publication; existing users continue under the version in effect
+   when they first obtained the software.
