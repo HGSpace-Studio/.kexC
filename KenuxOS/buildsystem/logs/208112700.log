@@ -1,8 +1,0 @@
--- Start building task run all -- (208112700)
--- Start building task all -- (0)
--- Start building task kernel -- (1)
--- Enter folder esp/EFI/BOOT --
-<0> Generating esp/EFI/BOOT/BOOTX64.EFI
-<0> Running command: ""D:\\mingw64\\bin\\gcc.exe" -target x86_64-w64-mingw32 -ffreestanding -fno-stack-protector -fno-short-enums -Wall -Wextra -O2 -Wl,--subsystem,10 -Wl,-e,efi_main -nostdlib -nostartfiles -I bootloader -o esp/EFI/BOOT/BOOTX64.EFI bootloader/bootx64.c"
-gcc.exe: error: unrecognized command-line option '-target'
-FAILED TASK run all: 

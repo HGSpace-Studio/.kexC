@@ -1,7 +1,0 @@
-Target information
-Name: kernel
-Kind: aggregate
-Outputs:
-Inputs:
-Depends on:
-  kernel-bin
