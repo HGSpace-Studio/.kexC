@@ -365,6 +365,32 @@ extern "C" {
 #define SYS_clone3              435
 #define SYS_close_range         436
 
+/* --- 新增标准 syscall (333-450, 对齐 KenuxOS kapi_syscall.h) --- */
+#define SYS_io_pgetevents           333
+#define SYS_rseq                    334
+#define SYS_kexec_file_load2        335
+#define SYS_pidfd_send_signal       424
+#define SYS_open_tree               428
+#define SYS_move_mount              429
+#define SYS_fsopen                  430
+#define SYS_fsconfig                431
+#define SYS_fsmount                 432
+#define SYS_fspick                  433
+#define SYS_pidfd_open              434
+#define SYS_pidfd_getfd             438
+#define SYS_faccessat2              439
+#define SYS_process_madvise         440
+#define SYS_epoll_pwait2            441
+#define SYS_mount_setattr           442
+#define SYS_quotactl_fd             443
+#define SYS_landlock_create_ruleset 444
+#define SYS_landlock_add_rule       445
+#define SYS_landlock_restrict_self  446
+#define SYS_memfd_secret            447
+#define SYS_process_mrelease        448
+#define SYS_futex_waitv             449
+#define SYS_set_mempolicy_home_node 450
+
 /* --- Kenux 扩展 syscall (451-500) --- */
 #define SYS_kenux_info              451
 #define SYS_kenux_debug             452
@@ -987,6 +1013,83 @@ KEX_ALWAYS_INLINE long sys_seccomp(unsigned op, unsigned flags, const void *args
 }
 KEX_ALWAYS_INLINE long sys_bpf(int cmd, void *attr, unsigned int size) {
     return kex_syscall3(SYS_bpf, (long)cmd, (long)attr, (long)size);
+}
+
+/* --- 新增 syscall (333-450) 内联包装 --- */
+KEX_ALWAYS_INLINE long sys_io_pgetevents(void *ctx, long min_nr, long nr,
+                                         void *events, const void *timeout, const void *usig) {
+    return kex_syscall6(SYS_io_pgetevents, (long)ctx, min_nr, nr, (long)events, (long)timeout, (long)usig);
+}
+KEX_ALWAYS_INLINE long sys_rseq(void *rseq, uint32_t rseq_len, int flags, uint32_t sig) {
+    return kex_syscall4(SYS_rseq, (long)rseq, (long)rseq_len, (long)flags, (long)sig);
+}
+KEX_ALWAYS_INLINE long sys_kexec_file_load2(int kernel_fd, int initrd_fd,
+                                             unsigned long cmdline_len, const char *cmdline, unsigned long flags) {
+    return kex_syscall5(SYS_kexec_file_load2, (long)kernel_fd, (long)initrd_fd, (long)cmdline_len, (long)cmdline, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_pidfd_send_signal(int pidfd, int sig, const void *info, unsigned flags) {
+    return kex_syscall4(SYS_pidfd_send_signal, (long)pidfd, (long)sig, (long)info, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_open_tree(int dfd, const char *path, unsigned flags) {
+    return kex_syscall3(SYS_open_tree, (long)dfd, (long)path, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_move_mount(int from_dfd, const char *from_path,
+                                      int to_dfd, const char *to_path, unsigned flags) {
+    return kex_syscall5(SYS_move_mount, (long)from_dfd, (long)from_path, (long)to_dfd, (long)to_path, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_fsopen(const char *fs_name, unsigned flags) {
+    return kex_syscall2(SYS_fsopen, (long)fs_name, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_fsconfig(int fs_fd, unsigned cmd, const char *key, const void *value, int aux) {
+    return kex_syscall5(SYS_fsconfig, (long)fs_fd, (long)cmd, (long)key, (long)value, (long)aux);
+}
+KEX_ALWAYS_INLINE long sys_fsmount(int fs_fd, unsigned flags, unsigned attr_flags) {
+    return kex_syscall3(SYS_fsmount, (long)fs_fd, (long)flags, (long)attr_flags);
+}
+KEX_ALWAYS_INLINE long sys_fspick(int dfd, const char *path, unsigned flags) {
+    return kex_syscall3(SYS_fspick, (long)dfd, (long)path, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_pidfd_open(int pid, unsigned flags) {
+    return kex_syscall2(SYS_pidfd_open, (long)pid, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_pidfd_getfd(int pidfd, int targetfd, unsigned flags) {
+    return kex_syscall3(SYS_pidfd_getfd, (long)pidfd, (long)targetfd, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_faccessat2(int dfd, const char *path, int mode, int flags) {
+    return kex_syscall4(SYS_faccessat2, (long)dfd, (long)path, (long)mode, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_process_madvise(int pidfd, const void *iovec, size_t vlen, int advice, unsigned flags) {
+    return kex_syscall5(SYS_process_madvise, (long)pidfd, (long)iovec, (long)vlen, (long)advice, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_epoll_pwait2(int epfd, void *events, int maxevents, const void *timeout, const void *sigmask) {
+    return kex_syscall5(SYS_epoll_pwait2, (long)epfd, (long)events, (long)maxevents, (long)timeout, (long)sigmask);
+}
+KEX_ALWAYS_INLINE long sys_mount_setattr(int dfd, const char *path, unsigned attr_flags, const void *uattr, size_t usize) {
+    return kex_syscall5(SYS_mount_setattr, (long)dfd, (long)path, (long)attr_flags, (long)uattr, (long)usize);
+}
+KEX_ALWAYS_INLINE long sys_quotactl_fd(unsigned fd, unsigned cmd, int id, void *addr) {
+    return kex_syscall4(SYS_quotactl_fd, (long)fd, (long)cmd, (long)id, (long)addr);
+}
+KEX_ALWAYS_INLINE long sys_landlock_create_ruleset(const void *attr, size_t size, unsigned flags) {
+    return kex_syscall3(SYS_landlock_create_ruleset, (long)attr, (long)size, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_landlock_add_rule(int ruleset_fd, int rule_type, const void *rule_attr, unsigned flags) {
+    return kex_syscall4(SYS_landlock_add_rule, (long)ruleset_fd, (long)rule_type, (long)rule_attr, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_landlock_restrict_self(int ruleset_fd, unsigned flags) {
+    return kex_syscall2(SYS_landlock_restrict_self, (long)ruleset_fd, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_memfd_secret(unsigned flags) {
+    return kex_syscall1(SYS_memfd_secret, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_process_mrelease(int pidfd, unsigned flags) {
+    return kex_syscall2(SYS_process_mrelease, (long)pidfd, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_futex_waitv(void *waiters, unsigned nr_futexes, unsigned flags) {
+    return kex_syscall3(SYS_futex_waitv, (long)waiters, (long)nr_futexes, (long)flags);
+}
+KEX_ALWAYS_INLINE long sys_set_mempolicy_home_node(unsigned long start, unsigned long end, unsigned long home_node, unsigned long flags) {
+    return kex_syscall4(SYS_set_mempolicy_home_node, (long)start, (long)end, (long)home_node, (long)flags);
 }
 
 /* ========================================================================

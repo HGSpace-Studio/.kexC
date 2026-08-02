@@ -163,11 +163,11 @@ make demo-fileio
 
 ## API 体系
 
-KexKit 覆盖完整的 x86_64 syscall 集 (0-332) 加上 Kenux 扩展 (451-500):
+KexKit 覆盖完整的 x86_64 syscall 集 (0-450, 含新增 333-335/424/428-450) 加上 Kenux 扩展 (451-500):
 
 ### 标准 syscall (sys_ 前缀)
 
-文件 I/O、内存管理、进程线程、网络、信号、时间、文件系统、电源、扩展属性、io_uring、seccomp/eBPF 等共 300+ 个系统调用包装。
+文件 I/O、内存管理、进程线程、网络、信号、时间、文件系统、电源、扩展属性、io_uring、seccomp/eBPF、pidfd、landlock、mount API、futex_waitv 等共 330+ 个系统调用包装。
 
 ### Kenux 扩展 (kenux_ 前缀, 451-500)
 
