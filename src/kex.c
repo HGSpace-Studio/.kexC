@@ -2543,10 +2543,18 @@ static long kex_do_syscall(uint64_t nr, uint64_t a1, uint64_t a2, uint64_t a3,
     }
 }
 
-/* VEH: 拦截 int 0x80 (CD 80) 异常, 分发到 kex_do_syscall */
+/* VEH: 拦截 int 0x80 (CD 80) 异常, 分发到 kex_do_syscall.
+ * 防递归: kex_do_syscall 内部的 API 调用 (如 WriteFile) 可能触发
+ * 新异常, 导致 VEH 递归调用栈溢出. 用 g_in_syscall 标志阻止. */
+static BOOL g_in_syscall = FALSE;
+
 static LONG WINAPI kex_veh_handler(PEXCEPTION_POINTERS ep) {
     PEXCEPTION_RECORD er = ep->ExceptionRecord;
     CONTEXT *ctx = ep->ContextRecord;
+
+    /* 防递归: 如果已经在处理 syscall, 不再拦截 */
+    if (g_in_syscall)
+        return EXCEPTION_CONTINUE_SEARCH;
 
     /* int 0x80 在 Windows x64 触发 #GP (0xC000001D 或 0xC0000096) */
     if (er->ExceptionCode == 0xC000001D /* STATUS_ILLEGAL_INSTRUCTION */ ||
@@ -2554,8 +2562,10 @@ static LONG WINAPI kex_veh_handler(PEXCEPTION_POINTERS ep) {
         er->ExceptionCode == 0xC0000005 /* STATUS_ACCESS_VIOLATION (某些情况) */) {
         uint8_t *rip = (uint8_t *)ctx->Rip;
         if (rip[0] == 0xCD && rip[1] == 0x80) {
+            g_in_syscall = TRUE;
             long ret = kex_do_syscall(ctx->Rax, ctx->Rdi, ctx->Rsi, ctx->Rdx,
                                       ctx->R10, ctx->R8, ctx->R9);
+            g_in_syscall = FALSE;
             ctx->Rax = (DWORD64)(int64_t)ret;
             ctx->Rip += 2; /* 跳过 CD 80 */
             return EXCEPTION_CONTINUE_EXECUTION;
@@ -2578,8 +2588,11 @@ static void patch_syscalls(uint8_t *code, size_t size) {
         printf("  [Win] 替换 %zu 条 syscall -> int 0x80\n", patched);
 }
 
+static int g_veh_done = 0;
 static void g_veh_init(void) {
+    if (g_veh_done) return;          /* GUI 模式下多次 run 只注册一次 */
     AddVectoredExceptionHandler(1, kex_veh_handler);
+    g_veh_done = 1;
 }
 
 #define KEX_SYSCALL_OP0  0xCD
@@ -2848,8 +2861,8 @@ static int load_kxp(const char *path) {
 static void run_entry(void *entry, void *stack_top) {
     void (*fn)(void) = (void (*)(void))entry;
 #ifdef _WIN32
-    /* Windows: .kex 代码里的 syscall 已被替换为 int 0x80 (VEH 处理),
-     * run_entry 末尾用 ExitProcess 而非 syscall exit_group */
+    /* Windows: .kex 代码里的 syscall 已被替换为 int 0x80 (VEH 处理).
+     * 用户代码正常返回后调 ExitProcess. */
     __asm__ volatile (
         "movq %1, %%rsp\n\t"
         "xorq %%rbp, %%rbp\n\t"
@@ -3110,8 +3123,10 @@ int kex_interp_main(int argc, char **argv) {
 
 /* 默认安装路径 */
 #ifdef _WIN32
-#define KEX_INSTALL_DIR "C:\\Windows"
-#define KEX_INSTALL_PATH "C:\\Windows\\kex.exe"
+/* Windows: 安装到 %LOCALAPPDATA%\KexKit (用户目录, 无需管理员权限,
+ * 与 Python/Node 等工具的安装方式一致) */
+#define KEX_INSTALL_DIR  "KexKit"
+#define KEX_INSTALL_PATH "KexKit\\kex.exe"
 #else
 #define KEX_INSTALL_DIR "/usr/local/bin"
 #define KEX_INSTALL_PATH "/usr/local/bin/kex"
@@ -3134,8 +3149,8 @@ static void print_help(void) {
     printf("          编译 C 源码为 .kex (HGS 格式)\n");
     printf("  run <program.kex> [-L<libdir>] [args...]\n");
     printf("          运行 .kex 程序\n");
-    printf("  install [路径]  安装 kex 到系统路径 (默认: %s)\n", KEX_INSTALL_PATH);
-    printf("          安装后可在任意目录直接使用 kex 命令\n");
+    printf("  install [路径]  安装 kex (默认: %%LOCALAPPDATA%%\\%s)\n", KEX_INSTALL_PATH);
+    printf("          Windows 自动添加 PATH, 安装后新开终端即可用 kex\n");
     printf("  version 显示版本信息\n");
     printf("  help    显示此帮助\n");
     printf("\n");
@@ -3152,6 +3167,20 @@ static int kex_install_self(const char *argv0, const char *target) {
         fprintf(stderr, "错误: 无法获取自身路径\n");
         return 1;
     }
+
+    /* Windows: 默认安装到 %LOCALAPPDATA%\KexKit\kex.exe
+     * (用户目录, 无需管理员权限, 与 Python/Node 等工具一致) */
+    char default_dest[MAX_PATH];
+    if (!target) {
+        char appdata[MAX_PATH];
+        DWORD alen = GetEnvironmentVariableA("LOCALAPPDATA", appdata, sizeof(appdata));
+        if (alen == 0 || alen >= sizeof(appdata)) {
+            fprintf(stderr, "错误: 无法获取 LOCALAPPDATA\n");
+            return 1;
+        }
+        snprintf(default_dest, sizeof(default_dest), "%s\\%s", appdata, KEX_INSTALL_PATH);
+        target = default_dest;
+    }
 #else
     ssize_t len = readlink("/proc/self/exe", self_path, sizeof(self_path) - 1);
     if (len < 0) {
@@ -3164,7 +3193,41 @@ static int kex_install_self(const char *argv0, const char *target) {
     const char *dest = target ? target : KEX_INSTALL_PATH;
     printf("安装 KexKit 到: %s\n", dest);
 
-    /* 复制文件 */
+#ifdef _WIN32
+    /* Windows: 用 CopyFileA 复制 (比 fopen/fread/fwrite 更可靠,
+     * 能正确处理文件锁定和权限) */
+    {
+        /* 提取目标目录并创建 */
+        char dir_path[1024];
+        strncpy(dir_path, dest, sizeof(dir_path) - 1);
+        dir_path[sizeof(dir_path) - 1] = 0;
+        char *last_slash = strrchr(dir_path, '\\');
+        if (last_slash) {
+            *last_slash = 0;
+            CreateDirectoryA(dir_path, NULL);
+        }
+
+        /* 删除旧文件 (如果存在且被锁定, CopyFileA 会失败) */
+        DeleteFileA(dest);
+
+        if (CopyFileA(self_path, dest, FALSE)) {
+            /* 读取文件大小用于显示 */
+            WIN32_FILE_ATTRIBUTE_DATA fa;
+            size_t total = 0;
+            if (GetFileAttributesExA(dest, GetFileExInfoStandard, &fa)) {
+                total = (size_t)fa.nFileSizeLow;
+            }
+            printf("\xe2\x9c\x93 安装完成 (%zu 字节)\n", total);
+        } else {
+            DWORD err = GetLastError();
+            fprintf(stderr, "错误: 复制失败 (错误码 %lu)\n", err);
+            if (err == 5)   fprintf(stderr, "  → 拒绝访问 (文件可能被占用, 请先关闭正在运行的 kex)\n");
+            if (err == 3)   fprintf(stderr, "  → 找不到路径\n");
+            return 1;
+        }
+    }
+#else
+    /* Linux: 用 fopen 复制 */
     FILE *src_fp = fopen(self_path, "rb");
     if (!src_fp) {
         fprintf(stderr, "错误: 无法打开自身 (%s)\n", self_path);
@@ -3172,11 +3235,8 @@ static int kex_install_self(const char *argv0, const char *target) {
     }
 
     /* 确保目标目录存在 */
-#ifndef _WIN32
-    /* 创建 /usr/local/bin (可能已存在) */
     mkdir("/usr/local", 0755);
     mkdir("/usr/local/bin", 0755);
-#endif
 
     FILE *dst_fp = fopen(dest, "wb");
     if (!dst_fp) {
@@ -3199,14 +3259,96 @@ static int kex_install_self(const char *argv0, const char *target) {
     }
     fclose(src_fp);
     fclose(dst_fp);
-
-#ifndef _WIN32
-    /* 设置可执行权限 */
     chmod(dest, 0755);
+    printf("✓ 安装完成 (%zu 字节)\n", total);
 #endif
 
-    printf("✓ 安装完成 (%zu 字节)\n", total);
+#ifdef _WIN32
+    /* Windows: 自动添加安装目录到用户 PATH 环境变量 */
+    {
+        /* 提取安装目录 */
+        char install_dir[1024];
+        strncpy(install_dir, dest, sizeof(install_dir) - 1);
+        install_dir[sizeof(install_dir) - 1] = 0;
+        char *last_slash = strrchr(install_dir, '\\');
+        if (last_slash) *last_slash = 0;
+
+        /* 读取当前用户 PATH (HKCU\Environment\Path) */
+        HKEY hKey;
+        LONG rc = RegOpenKeyExA(HKEY_CURRENT_USER, "Environment", 0,
+                                KEY_READ | KEY_WRITE, &hKey);
+        if (rc == ERROR_SUCCESS) {
+            char old_path[32768];
+            DWORD path_len = sizeof(old_path);
+            DWORD path_type = 0;
+            old_path[0] = 0;
+
+            RegQueryValueExA(hKey, "Path", NULL, &path_type,
+                            (LPBYTE)old_path, &path_len);
+            old_path[(path_len < sizeof(old_path)) ? path_len : sizeof(old_path) - 1] = 0;
+
+            /* 检查是否已在 PATH 中 */
+            BOOL already_in_path = FALSE;
+            char *p = old_path;
+            while (p && *p) {
+                char *semi = strchr(p, ';');
+                size_t seg_len = semi ? (size_t)(semi - p) : strlen(p);
+                if (seg_len > 0) {
+                    if (_strnicmp(p, install_dir, seg_len) == 0 &&
+                        strlen(install_dir) == seg_len) {
+                        already_in_path = TRUE;
+                        break;
+                    }
+                }
+                p = semi ? semi + 1 : NULL;
+            }
+
+            if (already_in_path) {
+                printf("\xe2\x9c\x93 安装目录已在 PATH 中: %s\n", install_dir);
+            } else {
+                /* 追加到 PATH */
+                char new_path[34048];
+                if (old_path[0]) {
+                    /* 确保 old_path 以分号结尾 */
+                    size_t olen = strlen(old_path);
+                    if (olen > 0 && old_path[olen - 1] != ';')
+                        snprintf(new_path, sizeof(new_path), "%s;%s", old_path, install_dir);
+                    else
+                        snprintf(new_path, sizeof(new_path), "%s%s", old_path, install_dir);
+                } else {
+                    strncpy(new_path, install_dir, sizeof(new_path) - 1);
+                    new_path[sizeof(new_path) - 1] = 0;
+                }
+
+                /* 使用 REG_EXPAND_SZ 如果原来是 expand_sz, 否则用 REG_SZ */
+                DWORD new_type = (path_type == REG_EXPAND_SZ) ? REG_EXPAND_SZ : REG_SZ;
+                rc = RegSetValueExA(hKey, "Path", 0, new_type,
+                                   (const BYTE *)new_path,
+                                   (DWORD)(strlen(new_path) + 1));
+                if (rc == ERROR_SUCCESS) {
+                    printf("\xe2\x9c\x93 已添加到用户 PATH: %s\n", install_dir);
+                } else {
+                    printf("  警告: 写入 PATH 失败 (错误码 %ld)\n", rc);
+                }
+            }
+            RegCloseKey(hKey);
+
+            /* 广播 WM_SETTINGCHANGE 通知其他程序环境变量已更新 */
+            DWORD_PTR result;
+            SendMessageTimeoutA(HWND_BROADCAST, WM_SETTINGCHANGE, 0,
+                               (LPARAM)"Environment", SMTO_ABORTIFHUNG,
+                               100, &result);
+        } else {
+            printf("  警告: 无法打开注册表 (错误码 %ld)\n", rc);
+        }
+
+        printf("\n  \xe2\x9c\x93 现在可以在 cmd / PowerShell 中直接使用:\n");
+        printf("    kex compile / kex run / kex version\n");
+        printf("  \xe2\x84\xb9 新开的终端窗口会自动生效\n");
+    }
+#else
     printf("  现在可以在任意目录直接使用: kex compile / kex run / kex version\n");
+#endif
 
     return 0;
 }
@@ -3223,7 +3365,14 @@ static void print_version(void) {
     printf("\n");
 }
 
+#ifndef KEX_NO_MAIN
 int main(int argc, char **argv) {
+#ifdef _WIN32
+    /* Windows: 设置控制台为 UTF-8, 解决中文乱码 */
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+
     if (argc < 2) {
         print_help();
         return 1;
@@ -3265,3 +3414,4 @@ int main(int argc, char **argv) {
     fprintf(stderr, "运行 'kex help' 查看用法\n");
     return 1;
 }
+#endif /* KEX_NO_MAIN */
