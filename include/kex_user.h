@@ -443,6 +443,12 @@ extern "C" {
 #define SYS_kenux_kprobe_register   499
 #define SYS_kenux_kprobe_unregister 500
 
+#define SYS_kenux_reserved_start    501
+#define SYS_kenux_reserved_end      999
+
+#define KAPI_SYSCALL_MAX            1000
+#define KAPI_SYSCALL_COUNT          (SYS_kenux_reserved_end + 1)
+
 /* ========================================================================
  * 内联 syscall 包装 (0-6 参数)
  * 关键: 必须强制内联, 否则 -O2 下编译器可能不内联 static inline,
@@ -732,6 +738,12 @@ KEX_ALWAYS_INLINE long sys_getpgrp(void) { return kex_syscall0(SYS_getpgrp); }
 KEX_ALWAYS_INLINE long sys_setsid(void) { return kex_syscall0(SYS_setsid); }
 KEX_ALWAYS_INLINE long sys_getsid(int pid) { return kex_syscall1(SYS_getsid, (long)pid); }
 KEX_ALWAYS_INLINE long sys_sched_yield(void) { return kex_syscall0(SYS_sched_yield); }
+KEX_ALWAYS_INLINE long sys_getpriority(int which, int who) { return kex_syscall2(SYS_getpriority, (long)which, (long)who); }
+KEX_ALWAYS_INLINE long sys_setpriority(int which, int who, int prio) { return kex_syscall3(SYS_setpriority, (long)which, (long)who, (long)prio); }
+KEX_ALWAYS_INLINE long sys_sched_setparam(int pid, const void *param) { return kex_syscall2(SYS_sched_setparam, (long)pid, (long)param); }
+KEX_ALWAYS_INLINE long sys_sched_getparam(int pid, void *param) { return kex_syscall2(SYS_sched_getparam, (long)pid, (long)param); }
+KEX_ALWAYS_INLINE long sys_sched_setscheduler(int pid, int policy, const void *param) { return kex_syscall3(SYS_sched_setscheduler, (long)pid, (long)policy, (long)param); }
+KEX_ALWAYS_INLINE long sys_sched_getscheduler(int pid) { return kex_syscall1(SYS_sched_getscheduler, (long)pid); }
 
 /* --- 身份/权限 --- */
 KEX_ALWAYS_INLINE long sys_getuid(void) { return kex_syscall0(SYS_getuid); }

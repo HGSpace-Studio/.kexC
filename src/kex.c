@@ -626,6 +626,7 @@ static kex_api_entry_t kex_std_apis[] = {
     { "sys_sigaltstack", 0, 131, KEX_API_SYSCALL, 2 },
     { "sys_utime",       0, 132, KEX_API_SYSCALL, 2 },
     { "sys_mknod",       0, 133, KEX_API_SYSCALL, 3 },
+    { "sys_uselib",      0, 134, KEX_API_SYSCALL, 1 },
     /* 系统配置 */
     { "sys_personality", 0, 135, KEX_API_SYSCALL, 1 },
     { "sys_ustat",       0, 136, KEX_API_SYSCALL, 2 },
@@ -645,6 +646,10 @@ static kex_api_entry_t kex_std_apis[] = {
     { "sys_munlock",     0, 150, KEX_API_SYSCALL, 2 },
     { "sys_mlockall",    0, 151, KEX_API_SYSCALL, 1 },
     { "sys_munlockall",  0, 152, KEX_API_SYSCALL, 0 },
+    { "sys_vhangup",     0, 153, KEX_API_SYSCALL, 0 },
+    { "sys_modify_ldt",  0, 154, KEX_API_SYSCALL, 3 },
+    { "sys_pivot_root",  0, 155, KEX_API_SYSCALL, 2 },
+    { "sys__sysctl",     0, 156, KEX_API_SYSCALL, 1 },
     /* 系统/资源 */
     { "sys_prctl",       0, 157, KEX_API_SYSCALL, 5 },
     { "sys_arch_prctl",  0, 158, KEX_API_SYSCALL, 2 },
@@ -663,9 +668,18 @@ static kex_api_entry_t kex_std_apis[] = {
     { "sys_setdomainname",0,171, KEX_API_SYSCALL, 2 },
     { "sys_iopl",        0, 172, KEX_API_SYSCALL, 1 },
     { "sys_ioperm",      0, 173, KEX_API_SYSCALL, 3 },
+    { "sys_create_module",0,174, KEX_API_SYSCALL, 2 },
     { "sys_init_module", 0, 175, KEX_API_SYSCALL, 3 },
     { "sys_delete_module",0,176, KEX_API_SYSCALL, 2 },
+    { "sys_get_kernel_syms",0,177,KEX_API_SYSCALL, 1 },
+    { "sys_query_module",0, 178, KEX_API_SYSCALL, 5 },
     { "sys_quotactl",    0, 179, KEX_API_SYSCALL, 4 },
+    { "sys_nfsservctl",  0, 180, KEX_API_SYSCALL, 3 },
+    { "sys_getpmsg",     0, 181, KEX_API_SYSCALL, 5 },
+    { "sys_putpmsg",     0, 182, KEX_API_SYSCALL, 5 },
+    { "sys_afs_syscall", 0, 183, KEX_API_SYSCALL, 0 },
+    { "sys_tuxcall",     0, 184, KEX_API_SYSCALL, 0 },
+    { "sys_security",    0, 185, KEX_API_SYSCALL, 0 },
     /* 扩展属性 */
     { "sys_setxattr",    0, 188, KEX_API_SYSCALL, 5 },
     { "sys_lsetxattr",   0, 189, KEX_API_SYSCALL, 5 },
@@ -687,12 +701,15 @@ static kex_api_entry_t kex_std_apis[] = {
     { "sys_futex",       0, 202, KEX_API_SYSCALL, 6 },
     { "sys_sched_setaffinity", 0, 203, KEX_API_SYSCALL, 3 },
     { "sys_sched_getaffinity", 0, 204, KEX_API_SYSCALL, 3 },
+    { "sys_set_thread_area",0,205,KEX_API_SYSCALL, 1 },
     /* IO */
     { "sys_io_setup",    0, 206, KEX_API_SYSCALL, 2 },
     { "sys_io_destroy",  0, 207, KEX_API_SYSCALL, 1 },
     { "sys_io_getevents",0, 208, KEX_API_SYSCALL, 5 },
     { "sys_io_submit",   0, 209, KEX_API_SYSCALL, 3 },
     { "sys_io_cancel",   0, 210, KEX_API_SYSCALL, 3 },
+    { "sys_get_thread_area",0,211,KEX_API_SYSCALL, 1 },
+    { "sys_lookup_dcookie",0,212,KEX_API_SYSCALL, 3 },
     /* epoll */
     { "sys_epoll_create",0, 213, KEX_API_SYSCALL, 1 },
     { "sys_epoll_ctl_old",0,214, KEX_API_SYSCALL, 4 },
@@ -720,6 +737,10 @@ static kex_api_entry_t kex_std_apis[] = {
     { "sys_epoll_ctl",   0, 233, KEX_API_SYSCALL, 4 },
     { "sys_tgkill",      0, 234, KEX_API_SYSCALL, 3 },
     { "sys_utimes",      0, 235, KEX_API_SYSCALL, 2 },
+    { "sys_vserver",     0, 236, KEX_API_SYSCALL, 0 },
+    { "sys_mbind",       0, 237, KEX_API_SYSCALL, 6 },
+    { "sys_set_mempolicy",0,238,KEX_API_SYSCALL, 3 },
+    { "sys_get_mempolicy",0,239,KEX_API_SYSCALL, 5 },
     /* 进程 */
     { "sys_waitid",      0, 247, KEX_API_SYSCALL, 5 },
     /* 消息队列 */
@@ -742,6 +763,7 @@ static kex_api_entry_t kex_std_apis[] = {
     { "sys_inotify_init",0, 253, KEX_API_SYSCALL, 0 },
     { "sys_inotify_add_watch",0,254,KEX_API_SYSCALL,3 },
     { "sys_inotify_rm_watch",0,255,KEX_API_SYSCALL,2 },
+    { "sys_migrate_pages",0,256,KEX_API_SYSCALL, 4 },
     /* *at 系列 */
     { "sys_openat",      0, 257, KEX_API_SYSCALL, 4 },
     { "sys_mkdirat",     0, 258, KEX_API_SYSCALL, 3 },
