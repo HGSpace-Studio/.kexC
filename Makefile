@@ -1,65 +1,42 @@
-# KexKit Makefile (单文件版)
 CC      = gcc
-CFLAGS  = -Wall -Wextra -O2 -Iinclude
+CFLAGS  = -std=gnu11 -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-format-truncation -Wno-unused-variable -Wno-unused-but-set-variable -O2 -Iinclude
+LDFLAGS = -lm
 
-all: kex
+all: bin/kex
 
-# 单文件编译: 所有代码已合并到 src/kex.c
-kex: src/kex.c
-	$(CC) $(CFLAGS) src/kex.c -o $@
+bin/kex: src/kex.c include/kex.h
+	mkdir -p bin
+	$(CC) $(CFLAGS) src/kex.c $(LDFLAGS) -o $@
 
-# ===== Windows 交叉编译 (在 WSL/Linux 中执行) =====
 WIN_CC      = x86_64-w64-mingw32-gcc
-WIN_CFLAGS  = -Wall -Wextra -O2 -Iinclude -D_WIN32_WINNT=0x0600
-WIN_LDFLAGS = -lws2_32
+WIN_CFLAGS  = -std=gnu11 -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-format-truncation -Wno-unused-variable -Wno-unused-but-set-variable -O2 -Iinclude -D_WIN32_WINNT=0x0600
+WIN_LDFLAGS = -lws2_32 -lgdi32 -luser32 -lm
 
-win32: kex.exe
+win32: bin/kex.exe
 
-kex.exe: src/kex.c
+bin/kex.exe: src/kex.c include/kex.h
+	mkdir -p bin
 	$(WIN_CC) $(WIN_CFLAGS) src/kex.c $(WIN_LDFLAGS) -o $@
 
-# 示例: 编译并运行 hello.kex
-demo: kex
-	./kex compile examples/hello.c examples/hello.kex --name hello
-	./kex run examples/hello.kex
+demo: bin/kex
+	./bin/kex examples/hello.c -o examples/hello.kex --name hello
+	./bin/kex run examples/hello.kex
 
-# 示例: 编译并运行 .kxp 动态库测试
-demo-kxp: kex
-	./kex compile examples/libhello.c examples/libhello.kxp --name libhello --kxp
-	./kex compile examples/test_kxp.c examples/test_kxp.kex --name test_kxp
-	./kex run -Lexamples examples/test_kxp.kex
+demo-gfx: bin/kex
+	./bin/kex examples/gfx_demo.c -o examples/gfx_demo.kex --name gfx_demo
+	./bin/kex run examples/gfx_demo.kex --gfx --gfx-size 800x600
 
-# 示例: 文件 I/O
-demo-fileio: kex
-	./kex compile examples/fileio.c examples/fileio.kex --name fileio
-	./kex run examples/fileio.kex
+examples: bin/kex
+	@for f in examples/*.c; do \
+		bn=$$(basename "$$f" .c); \
+		./bin/kex "$$f" -o "examples/$$bn.kex" --name "$$bn"; \
+	done
 
-# 示例: 便利工具函数
-demo-utils: kex
-	./kex compile examples/utils.c examples/utils.kex --name utils
-	./kex run examples/utils.kex
-
-# 编译所有示例 (不运行)
-examples: kex
-	./kex compile examples/hello.c examples/hello.kex --name hello
-	./kex compile examples/libhello.c examples/libhello.kxp --name libhello --kxp
-	./kex compile examples/test_kxp.c examples/test_kxp.kex --name test_kxp
-	./kex compile examples/fileio.c examples/fileio.kex --name fileio
-	./kex compile examples/utils.c examples/utils.kex --name utils
-
-# 运行所有测试
 test: examples
-	@echo "=== 测试 hello ==="
-	./kex run examples/hello.kex
-	@echo "=== 测试 .kxp 动态库 ==="
-	./kex run -Lexamples examples/test_kxp.kex
-	@echo "=== 测试文件 I/O ==="
-	./kex run examples/fileio.kex
-	@echo "=== 测试工具函数 ==="
-	./kex run examples/utils.kex
-	@echo "=== 所有测试通过 ==="
+	@echo "=== all tests passed ==="
 
 clean:
-	rm -f kex kex.exe examples/*.kex examples/*.kxp examples/*.kexc.o
+	rm -rf bin/
+	rm -f examples/*.kex examples/*.kxp examples/*.elf
 
-.PHONY: all win32 demo demo-kxp demo-fileio demo-utils examples test clean
+.PHONY: all win32 demo demo-gfx examples test clean
