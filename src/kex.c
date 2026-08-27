@@ -17,6 +17,7 @@
 #else
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <dlfcn.h>
 #define KEX_PATH_SEP '/'
 #define KEX_PATH_SEP_STR "/"
@@ -773,6 +774,10 @@ static int do_compile(kex_config_t *cfg) {
     return KEX_OK;
 }
 
+#ifndef _WIN32
+static int kex_load_and_execute(const char *kex_path);
+#endif
+
 #ifdef _WIN32
 static int run_kex_with_window_win32(const char *kex_path, int width, int height) {
     HINSTANCE hInst = GetModuleHandle(NULL);
@@ -793,16 +798,18 @@ static int run_kex_with_window_win32(const char *kex_path, int width, int height
     HBITMAP hbm = CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
     HDC memdc = CreateCompatibleDC(hdc);
     SelectObject(memdc, hbm);
-    size_t kex_len = 0;
-    uint8_t *kex_data = (uint8_t *)file_read(kex_path, &kex_len);
-    if (kex_data) {
-        kex_header_t *hdr = (kex_header_t *)kex_data;
-        if (hdr->magic[0] == KEX_MAGIC0 && hdr->code_size > 0) {
-            uint8_t *code = kex_data + hdr->entry_offset + 8;
-            void (*fn)(void*) = (void(*)(void*))(void*)code;
-            fn(NULL);
+    {
+        size_t kex_len = 0;
+        uint8_t *kex_data = (uint8_t *)file_read(kex_path, &kex_len);
+        if (kex_data && kex_len >= sizeof(kex_header_t)) {
+            kex_header_t *hdr = (kex_header_t *)kex_data;
+            if (hdr->magic[0] == KEX_MAGIC0 && hdr->code_size > 0) {
+                uint8_t *code = kex_data + hdr->entry_offset + 8;
+                void (*fn)(void*) = (void(*)(void*))(void*)code;
+                fn(NULL);
+            }
+            free(kex_data);
         }
-        free(kex_data);
     }
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -858,17 +865,7 @@ static int run_kex_with_window_x11(const char *kex_path, int width, int height) 
     xf_map(dpy, win);
     if (xf_sync) xf_sync(dpy, 0);
 
-    size_t kex_len = 0;
-    uint8_t *kex_data = (uint8_t *)file_read(kex_path, &kex_len);
-    if (kex_data) {
-        kex_header_t *hdr = (kex_header_t *)kex_data;
-        if (hdr->magic[0] == KEX_MAGIC0 && hdr->code_size > 0) {
-            uint8_t *code = kex_data + hdr->entry_offset + 8;
-            void (*fn)(void*) = (void(*)(void*))(void*)code;
-            fn(NULL);
-        }
-        free(kex_data);
-    }
+    kex_load_and_execute(kex_path);
 
     if (xf_next) {
         char ev[64];
@@ -882,7 +879,84 @@ static int run_kex_with_window_x11(const char *kex_path, int width, int height) 
 }
 #endif
 
-static int do_run(const char *kex_path, bool force_gfx, int gfx_w, int gfx_h) {
+typedef struct {
+    const char *name;
+    uint32_t nr;
+} kex_syscall_map_t;
+
+static const kex_syscall_map_t kex_syscall_table[] = {
+    {"sys_read", 0}, {"sys_write", 1}, {"sys_open", 2}, {"sys_close", 3},
+    {"sys_stat", 4}, {"sys_fstat", 5}, {"sys_lstat", 6}, {"sys_poll", 7},
+    {"sys_lseek", 8}, {"sys_mmap", 9}, {"sys_mprotect", 10}, {"sys_munmap", 11},
+    {"sys_brk", 12}, {"sys_rt_sigaction", 13}, {"sys_rt_sigprocmask", 14},
+    {"sys_ioctl", 16}, {"sys_pread64", 17}, {"sys_pwrite64", 18},
+    {"sys_access", 21}, {"sys_pipe", 22}, {"sys_select", 23},
+    {"sys_sched_yield", 24}, {"sys_dup", 32}, {"sys_dup2", 33},
+    {"sys_nanosleep", 35}, {"sys_getpid", 39}, {"sys_socket", 41},
+    {"sys_connect", 42}, {"sys_accept", 43}, {"sys_sendto", 44},
+    {"sys_recvfrom", 45}, {"sys_shutdown", 48}, {"sys_bind", 49},
+    {"sys_listen", 50}, {"sys_clone", 56}, {"sys_fork", 57},
+    {"sys_execve", 59}, {"sys_exit", 60}, {"sys_wait4", 61},
+    {"sys_kill", 62}, {"sys_uname", 63}, {"sys_fcntl", 72},
+    {"sys_fsync", 74}, {"sys_truncate", 76}, {"sys_ftruncate", 77},
+    {"sys_getdents", 78}, {"sys_getcwd", 79}, {"sys_chdir", 80},
+    {"sys_rename", 82}, {"sys_mkdir", 83}, {"sys_rmdir", 84},
+    {"sys_creat", 85}, {"sys_link", 86}, {"sys_unlink", 87},
+    {"sys_symlink", 88}, {"sys_readlink", 89}, {"sys_chmod", 90},
+    {"sys_chown", 92}, {"sys_umask", 95}, {"sys_gettimeofday", 96},
+    {"sys_sysinfo", 99}, {"sys_getuid", 102}, {"sys_getgid", 104},
+    {"sys_setuid", 105}, {"sys_setgid", 106}, {"sys_geteuid", 107},
+    {"sys_getegid", 108}, {"sys_setpgid", 109}, {"sys_getppid", 110},
+    {"sys_setsid", 112}, {"sys_getrlimit", 97}, {"sys_setrlimit", 160},
+    {"sys_mremap", 25}, {"sys_msync", 26}, {"sys_madvise", 28},
+    {"sys_mlock", 149}, {"sys_munlock", 150},
+    {"sys_epoll_create", 213}, {"sys_epoll_ctl", 233}, {"sys_epoll_wait", 232},
+    {"sys_sendfile", 40}, {"sys_getrandom", 318}, {"sys_memfd_create", 319},
+    {"sys_clock_gettime", 228}, {"sys_clock_settime", 227},
+    {"sys_futex", 202}, {"sys_eventfd2", 290},
+    {"sys_openat", 257}, {"sys_fchmod", 91}, {"sys_fchown", 93},
+    {"sys_dup3", 292}, {"sys_pipe2", 293}, {"sys_signalfd4", 289},
+    {"sys_timerfd_create", 283}, {"sys_timerfd_settime", 286},
+    {"sys_inotify_init1", 294}, {"sys_inotify_add_watch", 254},
+    {"sys_inotify_rm_watch", 255},
+    {"sys_kenux_info", 451}, {"sys_kenux_debug", 452},
+    {"sys_kenux_get_version", 453}, {"sys_kenux_get_uptime", 454},
+    {"sys_kenux_get_loadavg", 455}, {"sys_kenux_reboot", 456},
+    {"sys_kenux_poweroff", 457}, {"sys_kenux_halt", 458},
+    {"sys_kenux_get_cpu_count", 459}, {"sys_kenux_get_cpu_info", 460},
+    {"sys_kenux_set_affinity", 461}, {"sys_kenux_get_affinity", 462},
+    {"sys_kenux_create_namespace", 463}, {"sys_kenux_enter_namespace", 464},
+    {"sys_kenux_get_namespace", 465}, {"sys_kenux_vmspace_create", 466},
+    {"sys_kenux_vmspace_destroy", 467}, {"sys_kenux_vmspace_switch", 468},
+    {"sys_kenux_iommu_map", 469}, {"sys_kenux_iommu_unmap", 470},
+    {"sys_kenux_dma_alloc", 471}, {"sys_kenux_dma_free", 472},
+    {"sys_kenux_pci_read", 473}, {"sys_kenux_pci_write", 474},
+    {"sys_kenux_pci_enum", 475}, {"sys_kenux_acpi_query", 476},
+    {"sys_kenux_smbios_get", 477}, {"sys_kenux_fb_get_info", 478},
+    {"sys_kenux_fb_map", 479}, {"sys_kenux_fb_unmap", 480},
+    {"sys_kenux_fb_flip", 481}, {"sys_kenux_gpu_submit", 482},
+    {"sys_kenux_gpu_wait", 483}, {"sys_kenux_net_attach", 484},
+    {"sys_kenux_net_detach", 485}, {"sys_kenux_net_ioctl", 486},
+    {"sys_kenux_fs_snapshot", 487}, {"sys_kenux_fs_rollback", 488},
+    {"sys_kenux_fs_compress", 489}, {"sys_kenux_fs_encrypt", 490},
+    {"sys_kenux_audit_log", 491}, {"sys_kenux_audit_config", 492},
+    {"sys_kenux_seccomp_install", 493}, {"sys_kenux_seccomp_filter", 494},
+    {"sys_kenux_trace_attach", 495}, {"sys_kenux_trace_detach", 496},
+    {"sys_kenux_trace_read", 497}, {"sys_kenux_trace_write", 498},
+    {"sys_kenux_kprobe_register", 499}, {"sys_kenux_kprobe_unregister", 500},
+    {NULL, 0}
+};
+
+static uint32_t kex_find_syscall_nr(const char *name) {
+    for (int i = 0; kex_syscall_table[i].name; i++) {
+        if (strcmp(kex_syscall_table[i].name, name) == 0)
+            return kex_syscall_table[i].nr;
+    }
+    return 0xFFFFFFFFu;
+}
+
+#ifndef _WIN32
+static int kex_load_and_execute(const char *kex_path) {
     size_t kex_len = 0;
     uint8_t *kex_data = (uint8_t *)file_read(kex_path, &kex_len);
     if (!kex_data) {
@@ -902,6 +976,156 @@ static int do_run(const char *kex_path, bool force_gfx, int gfx_w, int gfx_h) {
         free(kex_data);
         fprintf(stderr, "kex: 非kex文件\n");
         return KEX_ERR_FORMAT;
+    }
+
+    uint32_t code_off = hdr->entry_offset + 8;
+    uint32_t code_size = hdr->code_size;
+    if (code_off + code_size > kex_len) {
+        free(kex_data);
+        fprintf(stderr, "kex: 代码段超出文件范围\n");
+        return KEX_ERR_FORMAT;
+    }
+
+    size_t total_map = code_size;
+    if (hdr->rodata_size > 0 && hdr->rodata_offset > 0)
+        total_map += hdr->rodata_size;
+
+    size_t stub_area = 4096;
+    if (hdr->import_count > 0)
+        stub_area = ((size_t)hdr->import_count * 32 + 4095) & ~(size_t)4095;
+
+    size_t map_size = total_map + stub_area;
+    map_size = (map_size + 4095) & ~(size_t)4095;
+
+    uint8_t *exec_mem = (uint8_t *)mmap(NULL, map_size,
+                                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (exec_mem == MAP_FAILED) {
+        free(kex_data);
+        fprintf(stderr, "kex: 无法分配可执行内存\n");
+        return KEX_ERR_IO;
+    }
+
+    uint8_t *code_base = exec_mem;
+    memcpy(code_base, kex_data + code_off, code_size);
+
+    uint8_t *rodata_base = NULL;
+    if (hdr->rodata_size > 0 && hdr->rodata_offset > 0) {
+        rodata_base = code_base + code_size;
+        memcpy(rodata_base, kex_data + hdr->rodata_offset, hdr->rodata_size);
+    }
+
+    uint8_t *stub_base = exec_mem + total_map;
+
+    if (hdr->local_reloc_cnt > 0 && hdr->local_reloc_off > 0 && rodata_base) {
+        uint8_t *lreloc_ptr = kex_data + hdr->local_reloc_off;
+        for (uint32_t i = 0; i < hdr->local_reloc_cnt; i++) {
+            kex_local_reloc_t *lr = (kex_local_reloc_t *)lreloc_ptr;
+            uint32_t patch_off = lr->patch_off;
+            uint32_t sym_val = lr->sym_value;
+            if (patch_off < code_size) {
+                uintptr_t target = (uintptr_t)rodata_base + sym_val;
+                uintptr_t patch_addr = (uintptr_t)code_base + patch_off;
+                int32_t disp = (int32_t)(target - (patch_addr + 4));
+                *(int32_t *)(code_base + patch_off) = disp;
+            }
+            lreloc_ptr += sizeof(kex_local_reloc_t);
+        }
+    }
+
+    if (hdr->import_count > 0 && hdr->import_offset > 0) {
+        uint8_t *import_ptr = kex_data + hdr->import_offset;
+        for (uint32_t i = 0; i < hdr->import_count; i++) {
+            uint32_t api_crc = *(uint32_t *)import_ptr;
+            uint32_t addr_slot_off = *(uint32_t *)(import_ptr + 4);
+            const char *api_name = (const char *)(import_ptr + 8);
+            size_t name_len = strlen(api_name) + 1;
+
+            uint32_t syscall_nr = kex_find_syscall_nr(api_name);
+            uint8_t *stub = stub_base + i * 32;
+
+            if (syscall_nr != 0xFFFFFFFFu) {
+                stub[0] = 0xB8;
+                *(uint32_t *)(stub + 1) = syscall_nr;
+                stub[5] = 0x0F;
+                stub[6] = 0x05;
+                stub[7] = 0xC3;
+            } else {
+                stub[0] = 0xB8;
+                *(uint32_t *)(stub + 1) = 0xFFFFFFFFu;
+                stub[5] = 0x0F;
+                stub[6] = 0x05;
+                stub[7] = 0xC3;
+            }
+
+            if (addr_slot_off > 0 && addr_slot_off < code_size) {
+                int32_t rel = (int32_t)((uintptr_t)stub - ((uintptr_t)code_base + addr_slot_off + 4));
+                *(int32_t *)(code_base + addr_slot_off) = rel;
+            }
+
+            import_ptr += 8 + name_len;
+            (void)api_crc;
+        }
+    }
+
+    if (hdr->reloc_offset > 0) {
+        uint8_t *reloc_ptr = kex_data + hdr->reloc_offset;
+        uint32_t n_relocs = *(uint32_t *)reloc_ptr;
+        reloc_ptr += 4;
+        for (uint32_t i = 0; i < n_relocs; i++) {
+            kex_reloc_entry_t *re = (kex_reloc_entry_t *)reloc_ptr;
+            (void)re;
+            reloc_ptr += sizeof(kex_reloc_entry_t);
+        }
+    }
+
+    mprotect(exec_mem, map_size, PROT_READ | PROT_EXEC);
+
+    void (*entry)(void) = (void (*)(void))(void *)code_base;
+
+    entry();
+
+    munmap(exec_mem, map_size);
+    free(kex_data);
+    return 0;
+}
+#endif
+
+static int do_run(const char *kex_path, bool force_gfx, int gfx_w, int gfx_h) {
+    const char *ext = strrchr(kex_path, '.');
+    if (ext && (strcmp(ext, ".elf") == 0 || strcmp(ext, ".elf32") == 0 || strcmp(ext, ".elf64") == 0)) {
+        char cmd[KEX_PATH_MAX + 32];
+        snprintf(cmd, sizeof(cmd), "%s", kex_path);
+        if (access(kex_path, X_OK) != 0) {
+            chmod(kex_path, 0755);
+        }
+        return run_cmd(cmd, false);
+    }
+
+    size_t kex_len = 0;
+    uint8_t *kex_data = (uint8_t *)file_read(kex_path, &kex_len);
+    if (!kex_data) {
+        fprintf(stderr, "kex: 无法读取 %s\n", kex_path);
+        return KEX_ERR_IO;
+    }
+
+    if (kex_len < sizeof(kex_header_t)) {
+        free(kex_data);
+        fprintf(stderr, "kex: 无效的kex文件\n");
+        return KEX_ERR_FORMAT;
+    }
+
+    kex_header_t *hdr = (kex_header_t *)kex_data;
+    if (hdr->magic[0] != KEX_MAGIC0 || hdr->magic[1] != KEX_MAGIC1 ||
+        hdr->magic[2] != KEX_MAGIC2 || hdr->magic[3] != KEX_MAGIC3) {
+        free(kex_data);
+        fprintf(stderr, "kex: 非kex文件 (尝试作为ELF执行)\n");
+        char cmd[KEX_PATH_MAX + 32];
+        snprintf(cmd, sizeof(cmd), "%s", kex_path);
+        if (access(kex_path, X_OK) != 0) {
+            chmod(kex_path, 0755);
+        }
+        return run_cmd(cmd, false);
     }
 
     bool needs_gfx = force_gfx;
@@ -935,9 +1159,27 @@ static int do_run(const char *kex_path, bool force_gfx, int gfx_w, int gfx_h) {
 #endif
     }
 
-    char cmd[KEX_PATH_MAX + 32];
-    snprintf(cmd, sizeof(cmd), "%s", kex_path);
-    return run_cmd(cmd, false);
+#ifdef _WIN32
+    {
+        size_t wl = 0;
+        uint8_t *wd = (uint8_t *)file_read(kex_path, &wl);
+        if (wd && wl >= sizeof(kex_header_t)) {
+            kex_header_t *wh = (kex_header_t *)wd;
+            if (wh->magic[0] == KEX_MAGIC0 && wh->code_size > 0) {
+                uint8_t *code = wd + wh->entry_offset + 8;
+                void (*fn)(void) = (void (*)(void))(void *)code;
+                fn();
+                free(wd);
+                return 0;
+            }
+        }
+        free(wd);
+    }
+#else
+    return kex_load_and_execute(kex_path);
+#endif
+
+    return KEX_ERR_FORMAT;
 }
 
 #define KBUILD_MAX_TARGETS 64

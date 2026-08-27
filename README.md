@@ -11,6 +11,11 @@ Kex 是 Kenux 专属的 C/C++ 编译工具链，面向 Kenux App 开发者。支
 - 跨平台：同一套代码在 Linux 和 Windows 上编译运行
 - 系统安装：`kex install` 一键安装到 PATH，终端随处可用
 
+## 文档
+
+- [从零开发 Kenux 程序教程](docs/TUTORIAL.md) — 从安装到开发完整应用
+- [API 参考文档](docs/API.md) — 所有 Kapi 接口详细定义
+
 ## 快速开始
 
 ### 编译
